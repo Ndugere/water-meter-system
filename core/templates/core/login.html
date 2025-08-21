@@ -1,0 +1,25 @@
+{% extends "core/base.html" %}
+
+{% block title %}Login | Water Meter System{% endblock %}
+
+{% block content %}
+<div class="col-md-6 col-lg-4">
+    <div class="card p-4 bg-light text-dark">
+        <h3 class="text-center mb-4">🔑 Login to Continue</h3>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="username" class="form-label fw-bold">Username</label>
+                <input type="text" name="username" id="username" class="form-control form-control-lg" placeholder="Enter your username" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label fw-bold">Password</label>
+                <input type="password" name="password" id="password" class="form-control form-control-lg" placeholder="Enter your password" required>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-custom btn-lg">Login</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

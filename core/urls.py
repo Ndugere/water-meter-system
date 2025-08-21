@@ -12,7 +12,6 @@ urlpatterns = [
     path("customers/<int:customer_id>/", views.customer_detail, name="customer_detail"),
     path('customers/<int:id>/edit/', views.customer_edit, name='customer_edit'),
     path('customers/<int:id>/delete/', views.customer_delete, name='customer_delete'),
-
     path('customers/add/', views.customer_add, name='customer_add'),
 
 
@@ -23,9 +22,21 @@ urlpatterns = [
     path("meters/<int:meter_id>/edit/", views.meter_edit, name="meter_edit"),
     path("meters/<int:meter_id>/delete/", views.meter_delete, name="meter_delete"),
 
+
+    path("billing/", views.billing_payments, name="billing_payments"),  # Main billing page
+    path("billing/add/", views.bill_add, name="bill_add"),
+    path("billing/edit/<int:bill_id>/", views.bill_edit, name="bill_edit"),
+    path("billing/delete/<int:bill_id>/", views.bill_delete, name="bill_delete"),
+
+    # ------------------ PAYMENT URLS ------------------
+    path("payment/add/", views.payment_add, name="payment_add"),
+    path("payment/edit/<int:payment_id>/", views.payment_edit, name="payment_edit"),
+    path("payment/delete/<int:payment_id>/", views.payment_delete, name="payment_delete"),
+
+
     # Categories
     path("water-management/", views.water_management, name="water_management"),
-    path("billing-payments/", views.billing_payments, name="billing_payments"),
+
     path("reports-analysis/", views.reports_analysis, name="reports_analysis"),
     path("system-settings/", views.system_settings, name="system_settings"),
 

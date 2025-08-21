@@ -4,7 +4,7 @@ from django.db.models import Sum
 from django.db.models.functions import Coalesce
 from decimal import Decimal
 from django.utils import timezone
-from .forms import CustomerForm, MeterForm
+from .forms import CustomerForm, MeterForm, BillForm, PaymentForm
 
 
 
@@ -130,6 +130,8 @@ def meter_detail(request, meter_id):
     }
     return render(request, "core/meter_detail.html", context)
 
+
+@login_required
 def meter_add(request):
     if request.method == "POST":
         form = MeterForm(request.POST)
@@ -140,6 +142,7 @@ def meter_add(request):
         form = MeterForm()
     return render(request, "core/meter_form.html", {"form": form, "title": "Add Meter"})
 
+@login_required
 def meter_edit(request, meter_id):
     meter = get_object_or_404(Meter, pk=meter_id)
     if request.method == "POST":
@@ -151,6 +154,7 @@ def meter_edit(request, meter_id):
         form = MeterForm(instance=meter)
     return render(request, "core/meter_form.html", {"form": form, "title": "Edit Meter"})
 
+@login_required
 def meter_delete(request, meter_id):
     meter = get_object_or_404(Meter, pk=meter_id)
     if request.method == "POST":
@@ -159,6 +163,108 @@ def meter_delete(request, meter_id):
     return render(request, "core/meter_confirm_delete.html", {"meter": meter})
 
 
+@login_required
+def billing_payments(request):
+    bills = Bill.objects.select_related('customer', 'reading').all()
+    payments = Payment.objects.select_related('bill__customer').all()
+
+    total_billed = bills.aggregate(total=Coalesce(Sum('amount_due'), Decimal('0.00')))['total']
+    total_collected = payments.aggregate(total=Coalesce(Sum('amount'), Decimal('0.00')))['total']
+    total_due = total_billed - total_collected
+    unpaid_bills_count = bills.filter(is_paid=False).count()
+
+    context = {
+        "bills": bills,
+        "payments": payments,
+        "total_billed": total_billed,
+        "total_collected": total_collected,
+        "total_due": total_due,
+        "unpaid_bills_count": unpaid_bills_count,
+    }
+    return render(request, "core/billing_payments.html", context)
+
+
+
+# ------------------ BILL VIEWS ------------------
+
+@login_required
+def bill_add(request):
+    if request.method == "POST":
+        form = BillForm(request.POST)
+        if form.is_valid():
+            bill = form.save(commit=False)
+            # Compute amount due based on meter reading and latest tariff
+            bill.amount_due = bill.compute_amount_due()
+            bill.save()
+            return redirect("billing_payments")  # redirect to bills/payments page
+    else:
+        form = BillForm()
+    return render(request, "core/bill_form.html", {"form": form, "title": "Add Bill"})
+
+
+@login_required
+def bill_edit(request, bill_id):
+    bill = get_object_or_404(Bill, pk=bill_id)
+    if request.method == "POST":
+        form = BillForm(request.POST, instance=bill)
+        if form.is_valid():
+            bill = form.save(commit=False)
+            bill.amount_due = bill.compute_amount_due()
+            bill.save()
+            return redirect("billing_payments")
+    else:
+        form = BillForm(instance=bill)
+    return render(request, "core/bill_form.html", {"form": form, "title": "Edit Bill"})
+
+
+@login_required
+def bill_delete(request, bill_id):
+    bill = get_object_or_404(Bill, pk=bill_id)
+    if request.method == "POST":
+        bill.delete()
+        return redirect("billing_payments")
+    return render(request, "core/bill_confirm_delete.html", {"bill": bill})
+
+
+# ------------------ PAYMENT VIEWS ------------------
+
+@login_required
+def payment_add(request):
+    if request.method == "POST":
+        form = PaymentForm(request.POST)
+        if form.is_valid():
+            payment = form.save()
+            # Update related bill status
+            payment.bill.update_status()
+            return redirect("billing_payments")
+    else:
+        form = PaymentForm()
+    return render(request, "core/payment_form.html", {"form": form, "title": "Add Payment"})
+
+
+@login_required
+def payment_edit(request, payment_id):
+    payment = get_object_or_404(Payment, pk=payment_id)
+    if request.method == "POST":
+        form = PaymentForm(request.POST, instance=payment)
+        if form.is_valid():
+            form.save()
+            payment.bill.update_status()
+            return redirect("billing_payments")
+    else:
+        form = PaymentForm(instance=payment)
+    return render(request, "core/payment_form.html", {"form": form, "title": "Edit Payment"})
+
+
+@login_required
+def payment_delete(request, payment_id):
+    payment = get_object_or_404(Payment, pk=payment_id)
+    if request.method == "POST":
+        bill = payment.bill
+        payment.delete()
+        bill.update_status()
+        return redirect("billing_payments")
+    return render(request, "core/payment_confirm_delete.html", {"payment": payment})
 
 
 # ======================
@@ -179,27 +285,6 @@ def water_management(request):
     return render(request, "categories/water_management.html", context)
 
 
-@login_required
-def billing_payments(request):
-    latest_bills = Bill.objects.select_related("customer", "reading")[:10]
-    payments = Payment.objects.select_related("bill", "bill__customer")[:10]
-    tariffs = Tariff.objects.all()
-
-    total_due = Bill.objects.aggregate(
-        total=Coalesce(Sum("amount_due"), Decimal("0.00"))
-    )["total"]
-    total_paid = Payment.objects.aggregate(
-        total=Coalesce(Sum("amount"), Decimal("0.00"))
-    )["total"]
-
-    context = {
-        "latest_bills": latest_bills,
-        "payments": payments,
-        "tariffs": tariffs,
-        "total_due": total_due,
-        "total_paid": total_paid,
-    }
-    return render(request, "categories/billing_payments.html", context)
 
 
 @login_required

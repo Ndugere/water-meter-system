@@ -1,0 +1,19 @@
+{% extends "core/base.html" %}
+
+{% block title %}Delete Customer | Water Meter System{% endblock %}
+
+{% block content %}
+<div class="col-md-6 col-lg-5 mx-auto">
+    <div class="card p-4 bg-light text-dark shadow">
+        <h3 class="text-center mb-4">⚠️ Confirm Delete</h3>
+        <p>Are you sure you want to delete <strong>{{ customer.name }}</strong>?</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'customer_detail' customer.pk %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

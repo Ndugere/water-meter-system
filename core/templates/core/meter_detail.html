@@ -1,0 +1,112 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Meter Detail{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5" style="background-color:#f5f7fa; min-height:80vh;">
+
+  <!-- Header -->
+  <div class="text-center mb-5">
+    <h1 class="fw-bold display-5 text-dark">💧 Meter Details</h1>
+    <p class="text-muted">Details for meter <strong>{{ meter.serial_number }}</strong> and its customer.</p>
+  </div>
+
+  <!-- Meter & Customer Info -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-6">
+      <div class="card shadow-sm rounded-4 p-4 text-center">
+        <h5 class="text-muted">Meter Info</h5>
+        <p class="fw-bold fs-5">{{ meter.serial_number }}</p>
+        <p class="small text-muted">Installed: {{ meter.installation_date }}</p>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card shadow-sm rounded-4 p-4 text-center">
+        <h5 class="text-muted">Customer Info</h5>
+        <p class="fw-bold fs-5">{{ meter.customer.name }}</p>
+        <p class="small text-muted">Account: {{ meter.customer.account_number }}</p>
+        <p class="small text-muted">Phone: {{ meter.customer.phone_number }}</p>
+        <p class="small text-muted">Address: {{ meter.customer.address }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Meter Readings -->
+  <div class="mb-5">
+    <h3 class="fw-bold text-dark mb-3">Meter Readings</h3>
+    <div class="row g-3">
+      {% for reading in readings %}
+      <div class="col-md-4">
+        <div class="card border shadow-sm rounded-4 p-3 text-center">
+          <div class="small text-muted">Date: {{ reading.reading_date }}</div>
+          <div class="fw-bold fs-5">Value: {{ reading.value }}</div>
+          <div class="small text-muted">Units Consumed: {{ reading.units_consumed|default:"N/A" }}</div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center">
+        <p class="text-muted">No readings recorded yet for this meter.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Quick Links -->
+  <div class="row g-4">
+    <div class="col-md-4">
+      <a href="{% url 'bills_list' meter.customer.id %}" class="dashboard-btn btn-primary">
+        <i class="bi bi-receipt fs-1 mb-2"></i>
+        <span class="fw-bold fs-5">View Bills</span>
+      </a>
+    </div>
+    <div class="col-md-4">
+      <a href="{% url 'payments_list' meter.customer.id %}" class="dashboard-btn btn-success">
+        <i class="bi bi-cash-coin fs-1 mb-2"></i>
+        <span class="fw-bold fs-5">View Payments</span>
+      </a>
+    </div>
+    <div class="col-md-4">
+      <a href="{% url 'customer_detail' meter.customer.id %}" class="dashboard-btn btn-warning text-dark">
+        <i class="bi bi-person fs-1 mb-2"></i>
+        <span class="fw-bold fs-5">Customer Details</span>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  .dashboard-btn {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 150px;
+    border-radius: 1rem;
+    text-decoration: none;
+    color: white;
+    background-color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+  }
+
+  .dashboard-btn i {
+    transition: color 0.3s ease;
+  }
+
+  .dashboard-btn:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 16px 32px rgba(0,0,0,0.25);
+    color: white !important;
+    background-color: #0d6efd !important;
+  }
+
+  .dashboard-btn:hover i {
+    color: white !important;
+  }
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+{% endblock %}

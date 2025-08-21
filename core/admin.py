@@ -4,8 +4,8 @@ from .models import Customer, Meter, MeterReading, Tariff, Bill, Payment, Notifi
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ("name", "account_number", "phone_number", "balance")
-    search_fields = ("name", "account_number")
+    list_display = ("name", "house_number", "phone_number", "balance")
+    search_fields = ("name", "house_number")
 
 
 @admin.register(Meter)

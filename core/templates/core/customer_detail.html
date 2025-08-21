@@ -1,0 +1,118 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% load humanize %}
+{% block title %}{{ customer.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5" style="background-color:#f5f7fa; min-height:80vh;">
+  <div class="mb-4">
+    <a href="{% url 'customers' %}" class="btn btn-outline-primary shadow-sm">
+        <i class="bi bi-arrow-left-circle me-2"></i> Back to All Customers
+    </a>
+  </div>
+
+  <!-- Customer Header -->
+  <div class="text-center mb-5">
+    <h1 class="fw-bold display-5 text-dark">👤 {{ customer.name }}</h1>
+    <p class="text-secondary">Account: {{ customer.account_number }} | Phone: {{ customer.phone_number }}</p>
+    <p class="text-secondary">Address: {{ customer.address }}</p>
+  </div>
+
+  <!-- Customer KPI Cards -->
+  <div class="row g-4 mb-5 text-center">
+
+    <!-- Balance -->
+    <div class="col-md-4">
+      <div class="kpi-card bg-warning text-dark shadow-sm rounded-4 p-4">
+        <div class="small">Outstanding Balance</div>
+        <div class="fs-4 fw-bold">KSh {{ customer.balance|floatformat:2|intcomma }}</div>
+      </div>
+    </div>
+
+    <!-- Meter Info -->
+    <div class="col-md-4">
+      <div class="kpi-card bg-primary text-white shadow-sm rounded-4 p-4">
+        <div class="small">Meter Serial</div>
+        {% if customer.meter %}
+        <div class="fs-4 fw-bold">{{ customer.meter.serial_number }}</div>
+        <div class="small">Installed: {{ customer.meter.installation_date }}</div>
+        {% else %}
+        <div class="fs-5 fw-bold text-light">No meter assigned</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Number of Bills -->
+    <div class="col-md-4">
+      <div class="kpi-card bg-success text-white shadow-sm rounded-4 p-4">
+        <div class="small">Total Bills</div>
+        <div class="fs-4 fw-bold">{{ customer.bills.count }}</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bills Section -->
+  <div class="mb-5">
+    <h3 class="fw-bold mb-3 text-dark">🧾 Bills</h3>
+    <div class="row g-3">
+      {% for bill in customer.bills.all %}
+      <div class="col-md-4">
+        <div class="kpi-card border rounded-4 p-3 shadow-sm bg-white text-dark">
+          <div class="small">Bill #{{ bill.id }}</div>
+          <div>Issued: {{ bill.issue_date }} | Due: {{ bill.due_date }}</div>
+          <div>Amount Due: KSh {{ bill.amount_due|floatformat:2|intcomma }}</div>
+          <div>Status: 
+            {% if bill.is_paid %}
+            <span class="text-success fw-bold">Paid</span>
+            {% else %}
+            <span class="text-danger fw-bold">Unpaid</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center">
+        <p class="text-secondary">No bills found for this customer.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Payments Section -->
+  <div class="mb-5">
+    <h3 class="fw-bold mb-3 text-dark">💰 Payments</h3>
+    <div class="row g-3">
+      {% for payment in customer.bills.all|dictsort:"payments" %}
+        {% for p in payment.payments.all %}
+        <div class="col-md-4">
+          <div class="kpi-card border rounded-4 p-3 shadow-sm bg-white text-dark">
+            <div class="small">Payment ID: {{ p.id }}</div>
+            <div>Bill: {{ p.bill.id }}</div>
+            <div>Amount: KSh {{ p.amount|floatformat:2|intcomma }}</div>
+            <div>Date: {{ p.payment_date }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      {% empty %}
+      <div class="col-12 text-center">
+        <p class="text-secondary">No payments found for this customer.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+<style>
+  .kpi-card {
+    transition: transform .2s ease;
+    text-align: center;
+  }
+  .kpi-card:hover {
+    transform: translateY(-4px);
+  }
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+{% endblock %}

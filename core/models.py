@@ -17,7 +17,7 @@ class User(AbstractUser):
 
 class Customer(models.Model):
     name = models.CharField(max_length=255)
-    account_number = models.CharField(max_length=50, unique=True)
+    house_number = models.CharField(max_length=50, unique=True)
     address = models.TextField()
     phone_number = models.CharField(max_length=20, blank=True, null=True)
 
@@ -25,7 +25,7 @@ class Customer(models.Model):
         ordering = ["name"]
 
     def __str__(self):
-        return f"{self.name} ({self.account_number})"
+        return f"{self.name} ({self.house_number})"
 
     @property
     def balance(self):

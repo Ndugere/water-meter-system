@@ -1,0 +1,73 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Customers & Meters{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5" style="background-color:#f5f7fa; min-height:80vh;">
+  <!-- Back to Dashboard -->
+  <div class="mb-4">
+    <a href="{% url 'dashboard' %}" class="btn btn-light shadow-sm">
+      <i class="bi bi-arrow-left-circle me-2"></i> Back to Dashboard
+    </a>
+  </div>
+
+  <h1 class="text-center mb-5 fw-bold" style="color: #333;">Customers & Meters</h1>
+
+  <div class="row g-4 justify-content-center">
+    <!-- Customers Button -->
+    <div class="col-lg-5 col-md-6">
+      <a href="{% url 'customers' %}" class="dashboard-btn btn-customers">
+        <i class="bi bi-people-fill fs-1 mb-3"></i>
+        <span class="fw-bold fs-5">Customers</span>
+      </a>
+    </div>
+
+    <!-- Meters Button -->
+    <div class="col-lg-5 col-md-6">
+      <a href="{% url 'meters' %}" class="dashboard-btn btn-meters">
+        <i class="bi bi-speedometer2 fs-1 mb-3"></i>
+        <span class="fw-bold fs-5">Meters</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Dashboard Buttons */
+  .dashboard-btn {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 220px; /* slightly taller */
+    width: 100%;
+    border-radius: 1rem;
+    background: white;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    color: inherit;
+  }
+  .dashboard-btn i, .dashboard-btn span {
+    transition: all 0.3s ease;
+  }
+  .dashboard-btn:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 16px 32px rgba(0,0,0,0.2);
+    color: white !important;
+  }
+
+  /* Button colors */
+  .btn-customers { color: #0d6efd; }
+  .btn-customers:hover { background-color: #0d6efd; color: white; }
+
+  .btn-meters { color: #198754; }
+  .btn-meters i { color: #0d6efd; } /* blue icon for meters */
+  .btn-meters:hover { background-color: #198754; color: white; }
+  .btn-meters:hover i { color: white; }
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+{% endblock %}

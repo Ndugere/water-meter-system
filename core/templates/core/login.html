@@ -3,23 +3,41 @@
 {% block title %}Login | Water Meter System{% endblock %}
 
 {% block content %}
-<div class="col-md-6 col-lg-4">
-    <div class="card p-4 bg-light text-dark">
-        <h3 class="text-center mb-4">🔑 Login to Continue</h3>
-        <form method="post">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label for="username" class="form-label fw-bold">Username</label>
-                <input type="text" name="username" id="username" class="form-control form-control-lg" placeholder="Enter your username" required>
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label fw-bold">Password</label>
-                <input type="password" name="password" id="password" class="form-control form-control-lg" placeholder="Enter your password" required>
-            </div>
-            <div class="d-grid">
-                <button type="submit" class="btn btn-custom btn-lg">Login</button>
-            </div>
-        </form>
+<div class="d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card p-4 bg-light text-dark shadow-lg">
+            <h3 class="text-center mb-4">🔑 Login to Continue</h3>
+            <form method="post">
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                
+                <div class="mb-3">
+                    <label for="username" class="form-label fw-bold">Username</label>
+                    <input type="text" name="username" id="username" class="form-control form-control-lg" placeholder="Enter your username" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label fw-bold">Password</label>
+                    <input type="password" name="password" id="password" class="form-control form-control-lg" placeholder="Enter your password" required>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-custom btn-lg">Login</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

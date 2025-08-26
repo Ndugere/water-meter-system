@@ -1,0 +1,25 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Delete Payment{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="min-height:80vh; background-color:#f5f7fa;">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="bg-white p-4 rounded-4 shadow-sm text-center">
+        <h3 class="fw-bold text-danger mb-3">⚠️ Confirm Delete</h3>
+        <p>Are you sure you want to delete Payment <strong>#{{ payment.id }}</strong> for Bill <strong>#{{ payment.bill.id }}</strong> ({{ payment.bill.customer.name }})?</p>
+
+        <form method="POST">
+          {% csrf_token %}
+          <div class="d-flex justify-content-center gap-3 mt-4">
+            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+            <a href="{% url 'billing_payments' %}" class="btn btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

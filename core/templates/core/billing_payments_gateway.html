@@ -1,0 +1,83 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="container py-5">
+  <h2 class="mb-5 text-center fw-bold display-6 text-dark">Billing & Payments</h2>
+
+  <div class="row justify-content-center g-4">
+    
+    <!-- View Bills Card -->
+    <div class="col-md-4">
+      <a href="{% url 'billing_list' %}" class="text-decoration-none">
+        <div class="card shadow-lg border-0 rounded-4 h-100 card-hover bills-card">
+          <div class="card-body text-center py-5">
+            <div class="icon-wrapper mb-3">
+              <i class="bi bi-receipt-cutoff" style="font-size: 3rem;"></i>
+            </div>
+            <h5 class="fw-bold">View Bills</h5>
+            <p class="text-secondary">Check and manage all your billing records seamlessly.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- View Payments Card -->
+    <div class="col-md-4">
+      <a href="{% url 'payments_list' %}" class="text-decoration-none">
+        <div class="card shadow-lg border-0 rounded-4 h-100 card-hover payments-card">
+          <div class="card-body text-center py-5">
+            <div class="icon-wrapper mb-3">
+              <i class="bi bi-credit-card-2-front" style="font-size: 3rem;"></i>
+            </div>
+            <h5 class="fw-bold">View Payments</h5>
+            <p class="text-secondary">Track all your payments with clarity and precision.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<!-- Custom Hover Effects -->
+<style>
+  .card-hover {
+    background-color: #f8f9fa; /* light gray base */
+    color: #343a40; /* dark text */
+    transition: all 0.35s ease;
+  }
+
+  .card-hover .icon-wrapper i {
+    transition: all 0.35s ease;
+  }
+
+  /* Bills card hover */
+  .bills-card:hover {
+    background-color: #198754; /* Bootstrap success green */
+    color: #fff;
+    transform: translateY(-10px) scale(1.04);
+    box-shadow: 0 15px 35px rgba(25, 135, 84, 0.4);
+  }
+  .bills-card:hover .icon-wrapper i {
+    color: #fff !important;
+  }
+
+  /* Payments card hover */
+  .payments-card:hover {
+    background-color: #0d6efd; /* Bootstrap primary blue */
+    color: #fff;
+    transform: translateY(-10px) scale(1.04);
+    box-shadow: 0 15px 35px rgba(13, 110, 253, 0.4);
+  }
+  .payments-card:hover .icon-wrapper i {
+    color: #fff !important;
+  }
+
+  /* Ensure text switches color */
+  .bills-card:hover h5,
+  .bills-card:hover p,
+  .payments-card:hover h5,
+  .payments-card:hover p {
+    color: #fff !important;
+  }
+</style>
+{% endblock %}

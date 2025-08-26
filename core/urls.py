@@ -16,6 +16,9 @@ urlpatterns = [
 
 
 
+
+    path("add-meter-reading/", views.add_meter_reading, name="add_meter_reading"),
+
     path('meters/', views.meters_list, name='meters'),  # All meters page
     path('meters/<int:meter_id>/', views.meter_detail, name='meter_detail'),  # Specific meter
     path("meters/add/", views.meter_add, name="meter_add"),
@@ -23,7 +26,7 @@ urlpatterns = [
     path("meters/<int:meter_id>/delete/", views.meter_delete, name="meter_delete"),
 
 
-    path("billing/", views.billing_payments, name="billing_payments"),  # Main billing page
+    #path("billing/", views.billing_payments, name="billing_paymentss"),  # Main billing page
     path("billing/add/", views.bill_add, name="bill_add"),
     path("billing/edit/<int:bill_id>/", views.bill_edit, name="bill_edit"),
     path("billing/delete/<int:bill_id>/", views.bill_delete, name="bill_delete"),
@@ -39,6 +42,12 @@ urlpatterns = [
 
     path("reports-analysis/", views.reports_analysis, name="reports_analysis"),
     path("system-settings/", views.system_settings, name="system_settings"),
+
+
+#real billing code here
+    path("billing-payments/", views.billing_payments_gateway, name="billing_payments"),
+    path("billing/", views.billing_list, name="billing_list"),
+    path("payments/", views.payments_list, name="payments_list"),
 
     # Authentication
     path("login/", LoginView.as_view(template_name="core/login.html"), name="login"),

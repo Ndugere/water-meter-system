@@ -5,7 +5,10 @@ from django.db.models.functions import Coalesce
 from decimal import Decimal
 from django.utils import timezone
 from .forms import CustomerForm, MeterForm, BillForm, PaymentForm
-
+from django.contrib import messages
+from django.core.paginator import Paginator
+from .forms import MeterReadingForm
+from django.urls import reverse
 
 
 from .models import Customer, Meter, MeterReading, Bill, Payment, Notification, Tariff
@@ -196,10 +199,15 @@ def bill_add(request):
             # Compute amount due based on meter reading and latest tariff
             bill.amount_due = bill.compute_amount_due()
             bill.save()
-            return redirect("billing_payments")  # redirect to bills/payments page
+            messages.success(request, f"Bill #{bill.id} added successfully!")  # Success message
+            return redirect("billing_payments")  # Redirect to bills/payments page
+        else:
+            messages.error(request, "Failed to add bill. Please check the form.")  # Error message
     else:
         form = BillForm()
     return render(request, "core/bill_form.html", {"form": form, "title": "Add Bill"})
+
+
 
 
 @login_required
@@ -322,3 +330,115 @@ def system_settings(request):
         "pending_notifications": pending_notifications,
     }
     return render(request, "categories/system_settings.html", context)
+
+
+
+
+# -------------------------
+# Billing & Payments Gateway
+# -------------------------
+@login_required
+def billing_payments_gateway(request):
+    return render(request, "core/billing_payments_gateway.html")
+
+
+# -------------------------
+# Bills List
+# -------------------------
+@login_required
+def billing_list(request):
+    # Base queryset
+    bills = Bill.objects.select_related("customer", "reading").prefetch_related("payments").order_by("-issue_date")
+
+    # --- Filters ---
+    status = request.GET.get("status")
+    search = request.GET.get("search")
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+
+    if status == "paid":
+        bills = bills.filter(is_paid=True)
+    elif status == "unpaid":
+        bills = bills.filter(is_paid=False)
+
+    if search:
+        bills = bills.filter(
+            Q(customer__name__icontains=search) |
+            Q(customer__house_number__icontains=search)
+        )
+
+    if start_date and end_date:
+        bills = bills.filter(issue_date__range=[start_date, end_date])
+
+    # --- Summary stats ---
+    total_billed = bills.aggregate(total=Sum("amount_due"))["total"] or 0
+    total_paid = sum([sum(p.amount for p in b.payments.all()) for b in bills])
+    outstanding = total_billed - total_paid
+    count_paid = bills.filter(is_paid=True).count()
+    count_unpaid = bills.filter(is_paid=False).count()
+
+    # --- Pagination ---
+    paginator = Paginator(bills, 20)  # 20 bills per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    # --- Export CSV if requested ---
+    if "export" in request.GET:
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="bills.csv"'
+        writer = csv.writer(response)
+        writer.writerow(["Customer", "Issue Date", "Due Date", "Amount Due", "Status"])
+        for bill in bills:
+            writer.writerow([
+                bill.customer.name,
+                bill.issue_date,
+                bill.due_date,
+                bill.amount_due,
+                "Paid" if bill.is_paid else "Unpaid"
+            ])
+        return response
+
+    context = {
+        "page_obj": page_obj,
+        "total_billed": total_billed,
+        "total_paid": total_paid,
+        "outstanding": outstanding,
+        "count_paid": count_paid,
+        "count_unpaid": count_unpaid,
+        "status": status,
+        "search": search,
+        "start_date": start_date,
+        "end_date": end_date,
+    }
+    return render(request, "core/billing_list.html", context)
+
+
+# -------------------------
+# Payments List
+# -------------------------
+@login_required
+def payments_list(request):
+    payments = Payment.objects.select_related("bill", "bill__customer").order_by("-payment_date")
+    
+    context = {
+        "payments": payments,
+    }
+    return render(request, "core/payments_list.html", context)
+
+
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import MeterReadingForm
+
+def add_meter_reading(request):
+    if request.method == "POST":
+        form = MeterReadingForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Meter reading added successfully.")
+            return redirect(reverse("billing_list"))  # Make sure this name exists in urls.py
+    else:
+        form = MeterReadingForm()
+
+    return render(request, "core/add_meter_reading.html", {"form": form})
